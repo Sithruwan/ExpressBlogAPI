@@ -1,9 +1,12 @@
+import "reflect-metadata";
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import 'dotenv/config'
-import connectDB from './src/configs/db.mjs'
-import indexRoutes from './src/routes/indexRoutes.mjs'
+import { connectDB } from './src/configs/DB/db.mjs'
+import syncDB from './src/configs/DB/syncDB.mjs'
+import indexRoute from './src/routes/IndexRoutes.mjs'
+
 
 const app = express()
 
@@ -18,9 +21,21 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 app.use(cookieParser())
 
-//Routes
-app.use(base_url,indexRoutes);
+const startServer = async () => {
+    try {
+      await connectDB();
+  
+      await syncDB();
+      
 
-app.listen(port, () => {
-    console.log(`Server is listening on port http://${host}:${port} 🚀`);
-})
+      app.use(base_url,indexRoute)
+  
+      app.listen(port, () => {
+        console.log(`Server is listening on port http://${host}:${port} 🚀`);
+      });
+    } catch (error) {
+      console.error("❌ Error starting the server:", error);
+    }
+  };
+  
+  startServer();
