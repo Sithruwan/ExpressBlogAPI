@@ -4,6 +4,8 @@ import postRepository from '../repos/Post.repo.mjs';
 import PostReqDTO from '../DTOs/req/PostReq.dto.mjs';
 import { sequelize } from '../configs/DB/db.mjs';
 import PostUpdateReqDTO from "../DTOs/req/PostUpdateReq.dto.mjs";
+import { socketService } from "../../app.mjs";
+
 
 class PostService {
     postRepository;
@@ -32,6 +34,8 @@ class PostService {
             
             // Commit the transaction
             await transaction.commit();
+            // Broadcast the post creation
+            socketService.broadcastPostCreated(newPost);
             return newPost;
         } catch (error) {
             // Rollback if there was an error
@@ -72,6 +76,8 @@ class PostService {
                 
                 // Commit the transaction
                 await transaction.commit();
+                // Broadcast the post update
+                socketService.broadcastPostUpdated(updatedPost);
                 return updatedPost;
             } catch (error) {
                 // Rollback if there was an error
@@ -98,6 +104,8 @@ class PostService {
                 
                 // Commit the transaction
                 await transaction.commit();
+                // Broadcast the post deletion
+                socketService.broadcastPostDeleted(id);
                 return { message: 'Post deleted successfully' };
             } catch (error) {
                 // Rollback if there was an error
