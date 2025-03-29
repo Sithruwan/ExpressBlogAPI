@@ -2,6 +2,7 @@
 import UserLoginDTO from "../DTOs/req/UserLogin.dto.mjs";
 import UserReqDTO from "../DTOs/req/UserReq.dto.mjs";
 import userService from "../services/UserService.mjs";
+import AppError from "../utills/errorHandlers/AppError.mjs";
 
 class UserController {
     userService;
@@ -9,30 +10,30 @@ class UserController {
         this.userService = userService;
     }
 
-     registerUser=async(req, res)=> {
+     registerUser=async(req, res,next)=> {
         try {
             // Create DTO with validation
             const userReqDTO = UserReqDTO.toDto(req.body);
 
             // Register user
-            const user = await this.userService.registerUser(userReqDTO);
+            const user = await this.userService.registerUser(userReqDTO,next);
             return res.status(201).json({
                 status: 'success',
                 message: 'User registered successfully',
             });
         } catch (error) {
             console.error('Registration error:', error);
-            return res.status(400).json({ error: error.message });
+            next(new AppError(error.message, 400, 'UserController-registerUser'));
         }
     }
 
-    loginUser=async(req, res)=> {
+    loginUser=async(req, res,next)=> {
         try {
             // Create DTO with validation
             const userLoginDto = UserLoginDTO.toDto(req.body);
 
             // Register user
-            const user = await this.userService.loginUser(userLoginDto);
+            const user = await this.userService.loginUser(userLoginDto,next);
             res.cookie('jwtToken', user.token, {
                 httpOnly: true,
                 sameSite: 'None', secure: true,
@@ -45,7 +46,7 @@ class UserController {
             });
         } catch (error) {
             console.error('Registration error:', error);
-            return res.status(400).json({ error: error.message });
+            next(new AppError(error.message, 400, 'UserController-loginUser'));
         }
     }
 }

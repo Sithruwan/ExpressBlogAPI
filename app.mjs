@@ -1,4 +1,4 @@
-import "reflect-metadata";
+
 import express from 'express';
 import { createServer } from 'node:http';
 import cors from 'cors';
@@ -9,9 +9,10 @@ import syncDB from './src/configs/DB/syncDB.mjs';
 import indexRoute from './src/routes/IndexRoutes.mjs';
 import { Server as SocketIO } from 'socket.io';
 import SocketService from "./src/services/SocketService.mjs";
+import errorHandler from "./src/utills/errorHandlers/errorHandler.mjs";
 
 const app = express();
-const socketServer = createServer(app); // Create HTTP server
+const socketServer = createServer(app); 
 export const io = new SocketIO(socketServer); // Attach Socket.IO to the HTTP server
 export const socketService = new SocketService(io);
 
@@ -27,23 +28,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
 
+
 // Socket.IO connection
 
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id); // socket.id is unique for each client
+  console.log('A user connected:', socket.id); 
 
   // Here you can set a flag or handle user-specific logic
   socket.on('disconnect', () => {
-      console.log('A user disconnected:', socket.id); // socket.id helps identify the user
-      // You can perform cleanup actions or notify other users that someone has disconnected
+      console.log('A user disconnected:', socket.id); 
+      
   });
 });
 
 const startServer = async () => {
   try {
-    await syncDB(); // Sync DB (do not call connectDB() here again)
+    await syncDB(); 
 
     app.use(base_url, indexRoute);
+
+    app.use(errorHandler); // Error handling middleware
 
     // Start the HTTP server with Socket.IO support
     socketServer.listen(port, () => {
