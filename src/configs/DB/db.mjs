@@ -1,9 +1,15 @@
 import { Sequelize } from 'sequelize';
+import 'dotenv/config';
 
+const dbName = process.env.DB_NAME || 'blogapidb';
+const dbUser = process.env.DB_USER || 'root';
+const dbPassword = process.env.DB_PASSWORD || '';
+const dbHost = process.env.DB_HOST || 'localhost';
+const dbDialect = process.env.DB_DIALECT || 'mysql';
 
-const sequelize = new Sequelize('blogapidb', 'root', '', {
-  host: 'localhost',
-  dialect: 'mysql',
+const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
+  host: dbHost,
+  dialect: dbDialect,
   logging: true, // Disable logging (optional)
 });
 
